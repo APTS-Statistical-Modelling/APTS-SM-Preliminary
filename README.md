@@ -3,7 +3,7 @@
 This repository hosts the notes for the preliminary material of the
 [APTS](https://apts.ac.uk) Statistical Modelling module.
 
-The notes are available in HTML and PDF formats from the followign links
+The notes are available in HTML and PDF formats at the following links
 | Format | Link                                                                    |
 |--------|-------------------------------------------------------------------------|
 | HTML   | https://ikosmidis.com/files/APTS-SM-Preliminary/                        |
