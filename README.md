@@ -9,4 +9,5 @@ The notes are available in HTML and PDF formats from the followign links
 | HTML   | https://ikosmidis.com/files/APTS-SM-Preliminary/                        |
 | PDF    | https://ikosmidis.com/files/APTS-SM-Preliminary/APTS-SM-preliminary.pdf |
 
+The notes are released under a [CC0-1.0 license](LICENSE).
 
