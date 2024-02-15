@@ -23,7 +23,7 @@ book:
         href: https://ikosmidis.com
       - icon: github
         href: https://github.com/ikosmidis
-      - icon: twitter 
+      - icon: twitter-x
         href: https://twitter.com/ikosmidis_
   chapters:
     - index.qmd
@@ -37,7 +37,6 @@ book:
   reader-mode: true
   page-navigation: true
   downloads: pdf
-  sharing: [twitter]
   repo-url: https://github.com/APTS-Statistical-Modelling/APTS-SM-Preliminary
   repo-actions: [edit, issue]
 
