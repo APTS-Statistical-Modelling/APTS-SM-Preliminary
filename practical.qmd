@@ -1,0 +1,148 @@
+# R practicals
+
+## Getting started
+
+For running the code below, you will need the R packages `MASS` and `SMPracticals`. The `MASS` package [@venables+ripley:2022] is one of the recommended R package and is included with the binary distributions of R, so you should have it. The `SMPracticals` package [@davison:2024] is the R package providing the datasets and a few functions for use with the practicals outlined in @davison:2003 [Appendix A], and can be installed by running
+```{r}
+#| eval: false
+install.packages("SMPracticals")
+```
+
+The packages can be loaded and attached by doing
+```{r}
+#| message: false
+#| eval: false
+library("MASS")
+library("SMPracticals")
+```
+
+## `trees` data
+
+`trees` contains data on the volume of timber, height and girth (diameter) of 31 felled black cherry trees; girth is measured four feet six inches above ground [@atkinson:1985, p. 63]. The problem is to find a simple linear model for predicting volume from height and girth. See `?trees` for more details.
+```{r}
+#| eval: false
+data("trees", package = "datasets")
+pairs(trees, panel = panel.smooth)
+pairs(log(trees), panel = panel.smooth)
+```
+
+`coplot()` generates conditioning plots, in which the relationship between two variables is displayed conditional on subsets of values of other variables. This is useful to see if the relationship is stable over the range of other variables. The plots should be read from left to right, starting from the bottom row, and each plot corresponds to the ranges of values (from left to right) shown on the top plot for the conditioning variable. For the relationship of log volume and log girth, conditional on height we get:
+```{r}
+#| eval: false
+coplot(log(Volume) ~ log(Girth) | Height, data = trees, panel = panel.smooth)
+```
+
+::: {.callout-tip appearance="simple"}
+Produce and interpret the conditioning plots on the orginal scale. 
+:::
+
+For an initial fit, we take a linear model and assess model fit using diagnostic plots:
+```{r}
+#| eval: false
+m_trees <- glm(Volume ~ Girth + Height, data = trees)
+summary(m_trees)
+plot.glm.diag(m_trees)
+```
+
+::: {.callout-tip appearance="simple"}
+What do you make of the `m_trees` fit?
+:::
+
+To assess the possibility of transformation:
+```{r}
+#| eval: false
+boxcox(m_trees)
+```
+Both $\lambda = 1$ and $\lambda = 0$ lie outside the confidence interval, though the latter is better supported. One possibility is to take $\lambda = 1/3$, corresponding to response $\texttt{Volume}^{1/3}$. 
+
+::: {.callout-tip appearance="simple"}
+What transformations for `Girth` and `Height` are then needed for dimensional compatibility? Fit this model, give interpretations of the parameter estimates, and discuss its suitability.
+:::
+
+An alternative is to suppose that a tree is conical in shape, in which case  
+$$
+\texttt{Volume} \propto \texttt{Height} \times \texttt{Girth}^2 \, .
+$$
+Equivalently, we fit
+```{r}
+#| eval: false
+m_trees_log <- glm(log(Volume) ~ log(Girth) + log(Height), data = trees)
+summary(m_trees_log)
+plot.glm.diag(m_trees_log)
+```
+
+::: {.callout-tip appearance="simple"}
+Are the parameter estimates consistent with this model? Does it fit adequately? What advantage has it over the others for prediction of future volumes?
+:::
+
+
+
+## `salinity` data
+
+`salinity` contains $n = 28$ observations on the salinity of water in Pamlico Sound, North Carolina [@ruppert+carrol:1980; @atkinson:1985, p. 48]. The response `sal` is the bi-weekly average of salinity. The other three columns contain values of the covariates, respectively a lagged value of salinity `lag`, a trend indicator `trend`, and the river discharge `dis`. 
+
+::: {.callout-tip appearance="simple"}
+Using the techniques from the analysis of the `tree` data set as a guide, find a model suitable for prediction of salinity from the covariates. The data contain at least one outlier.
+:::
+
+## `shuttle` data
+
+`shuttle` contains the data in @davison:2003 [Table 1.3] on O-ring failures for the space shuttle [@dalal+et+al:1989]. 
+```{r}
+#| eval: false
+data("shuttle", package = "SMPracticals")
+row.names(shuttle) <- NULL
+```
+
+To fit a binomial logistic regression model with covariate temperature, we do:
+```{r}
+#| eval: false
+m_shuttle <- glm(cbind(r, m - r) ~ temperature, family = binomial(), data = shuttle)
+anova(m_shuttle)
+summary(m_shuttle)
+```
+
+::: {.callout-tip appearance="simple"}
+Try fitting with and without both covariates. To assess model fit, try 
+```{r}
+#| eval: false
+plot.glm.diag(m_shuttle)
+```
+Do you find these diagnostics useful?
+:::
+
+## `bliss` data
+
+`bliss` provides data on mortality of flour-beetles as a function of dose of a poison [@bliss:1935]. To plot the death rates and fit a logistic regression model, we do:
+```{r}
+#| eval: false
+data("bliss", package = "SMPracticals")
+m_bliss_logit <- glm(cbind(r, m - r) ~ log(dose), family = binomial(), data = bliss)
+summary(m_bliss_logit)
+
+with(bliss, {
+    plot(log(dose), r/m, ylim = c(0, 1), ylab = "Proportion dead")
+    points(log(dose), fitted(m_bliss_logit), pch = 3, col = 2)
+})
+```
+
+::: {.callout-tip appearance="simple"}
+Does the fit seem reasonble to you? 
+
+Try again with the probit and cloglog link functions.
+:::
+
+For example, for the cloglog link function we have:
+```{r}
+#| eval: false
+m_bliss_cloglog <- glm(cbind(r, m-r) ~ log(dose), family = binomial("cloglog"), data = bliss)
+with(bliss, {
+    plot(log(dose), r/m, ylim = c(0, 1), ylab = "Proportion dead")
+    points(log(dose), fitted(m_bliss_logit), pch = 3, col = 2)
+    points(log(dose), fitted(m_bliss_cloglog), pch = 3, col = 3)
+})
+```
+
+::: {.callout-tip appearance="simple"}
+Which link function fits best? Give a careful interpretation of the resulting model.
+:::

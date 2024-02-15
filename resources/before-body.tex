@@ -1,0 +1,28 @@
+\definecolor{apts}{HTML}{BE05C1}
+$if(has-frontmatter)$
+\frontmatter
+$endif$
+$if(title)$
+\cleardoublepage
+\thispagestyle{empty}
+{\centering
+\href{https://apts.ac.uk}{\includegraphics[width = 0.4\textwidth]{resources/apts-large.png}} \par
+{\Huge\bfseries $title$ \par}
+$if(subtitle)$
+\vspace{1ex}
+{\LARGE\bfseries $subtitle$ \par}
+$endif$
+\vspace{5ex}
+{\bf\large $date$ \par}
+\vspace{5ex}
+$for(by-author)$
+{\large \href{$by-author.url$}{$by-author.name.literal$}} \\
+$for(by-author.affiliations)$%
+{$it.name$ \par}
+{$by-author.email$}
+\vspace{2ex}
+$endfor$
+$endfor$%
+$endif$
+}
+

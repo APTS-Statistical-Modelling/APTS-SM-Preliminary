@@ -1,0 +1,85 @@
+project:
+  type: book
+  output-dir: APTS-SM-Preliminary
+
+book:
+  title: "Statistical Modelling"
+  subtitle: "Preliminary material"
+  author:
+    - name: "Ioannis Kosmidis"
+      email: ioannis.kosmidis@warwick.ac.uk
+      affiliation: University of Warwick
+      url: https://ikosmidis.com
+  date: last-modified
+  date-format: long
+  license: CC0 1.0 Universal
+  output-file: "APTS-SM-preliminary"	
+  page-footer:
+    border: true
+    left: "License: [CC0 1.0 Universal](http://creativecommons.org/publicdomain/zero/1.0/){target='_blank'}"
+    right:
+      - text: Ioannis Kosmidis
+      - icon: globe
+        href: https://ikosmidis.com
+      - icon: github
+        href: https://github.com/ikosmidis
+      - icon: twitter 
+        href: https://twitter.com/ikosmidis_
+  chapters:
+    - index.qmd
+    - lm.qmd
+    - glm.qmd
+    - practical.qmd
+    - bibliography.qmd
+  sidebar:
+    logo: resources/apts-large.png
+    search: true
+  reader-mode: true
+  page-navigation: true
+  downloads: pdf
+  sharing: [twitter]
+  repo-url: https://github.com/APTS-Statistical-Modelling/APTS-SM-Preliminary
+  repo-actions: [edit, issue]
+
+bibliography: references.bib
+csl: resources/apa.csl
+
+
+format:
+  html:
+    other-links:
+      - text: "SM: Preliminary material"
+        href: https://ikosmidis.com/APTS-SM-preliminary
+      - text: "SM: Notes"
+        href: https://ikosmidis.com/APTS-SM-notes
+      - text: "APTS"
+        href: https://apts.ac.uk
+    number-depth: 2
+    toc: true
+    toc-location: right	
+    theme:
+      light: cosmo
+      dark: [cosmo, resources/theme-dark.scss]
+    code-copy: true
+    crossrefs-hover: true
+  pdf:
+    documentclass: report
+    template-partials:
+      - resources/before-body.tex
+    linkcolor: apts
+    filecolor: apts
+    citecolor: apts
+    urlcolor: apts
+    papersize: a4
+    toc-depth: 2
+    geometry:
+      - left = 2.5cm
+      - right = 2.5cm
+      - top = 3cm
+      - bottom = 3cm
+    include-in-header:
+      text: |
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \fancyhead[l]{\it\nouppercase{\leftmark}}

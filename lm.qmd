@@ -1,0 +1,608 @@
+::: {.content-hidden}
+{{< include resources/_macros.tex >}}
+:::
+
+
+# Linear models {#sec-lm}
+
+## Introduction {#sec-lm-intro}
+
+In practical applications, we often distinguish between a *response*
+variable and a group of *explanatory* variables (or *covariates*). The
+aim is to determine the pattern of dependence of the response variable
+on the explanatory variables. We denote the $n$ observations of the
+response variable by $y = (y_1, y_2, \ldots, y_n)^\top$. In a
+statistical model, these are assumed to be observations of *random
+variables* $Y = (Y_1, Y_2, \ldots, Y_n)^\top$. Associated with each
+$y_i$ is a vector $x_i = (1, x_{i1}, x_{i2}, \ldots, x_{ip})^\top$ of
+values of $p$ explanatory variables.
+
+Linear models are those for which the relationship between the response and explanatory
+variables is of the form
+$$
+\begin{aligned}
+\E(Y_i) & = \beta_0 + \beta_1 x_{i1} +\beta_2 x_{i2} + \ldots + \beta_p x_{ip} \\
+& =\sum_{j=0}^p x_{ij} \beta_j \quad \text{(where we define $x_{i0} = 1$)}  \\
+& = x_i^{\top}\beta  \\
+& = [X\beta]_i \qquad (i= 1, \ldots, n)\,, 
+\end{aligned}
+$$ {#eq-lm4}
+where
+$$
+\E(Y) = 
+\begin{bmatrix} \E(Y_1) \\ 
+\vdots \\ \E(Y_n) 
+\end{bmatrix} 
+\quad \text{and} \quad 
+X = 
+\begin{bmatrix}
+x_1^{\top} \\ \vdots \\ x_n^{\top}
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & x_{11} & \cdots & x_{1p} \\ 
+\vdots & \vdots & \ddots & \vdots \\
+1 &x_{n1} & \cdots & x_{np}
+\end{bmatrix}\,,
+$$
+and $\beta = (\beta_0, \beta_1, \ldots, \beta_p)^{\top}$ is a vector of
+fixed but unknown parameters describing the dependence of $Y_i$ on
+$x_i$.  The four ways of describing the linear model in ([-@eq-lm4])
+are equivalent, but the most economical is the matrix form
+$$
+\E(Y) = X \beta \,.
+$$ {#eq-lm-mat} 
+
+The $n\times (p + 1)$ matrix $X$ consists of known (observed)
+constants and is called the *model matrix*. The $i$th row of $X$ is
+$x_i^{\top}$, the explanatory data corresponding to the $i$th
+observation of the response.  The $j$th column of $X$ contains the $n$
+observations of the $j$th explanatory variable.
+
+::: {#exm-nm}
+
+The null model
+$$
+\E(Y_i) = \beta_0 \qquad (i = 1, \ldots, n)
+$$
+has
+$$
+X = 
+\begin{bmatrix} 
+1 \\ 
+1 \\ 
+\vdots 
+\\ 1 
+\end{bmatrix} 
+\quad \text{and} \quad
+\beta =
+\begin{bmatrix} 
+\beta_0 \\ 
+\beta_1 
+\end{bmatrix} \, .
+$$
+
+:::
+
+
+::: {#exm-slr}
+
+The simple linear regression
+$$
+\E(Y_i) = \beta_0 + \beta_1 x_i \qquad (i = 1, \ldots, n)
+$$
+has
+$$
+X = 
+\begin{bmatrix}
+1 & x_1 \\
+1 & x_2 \\
+\vdots & \vdots \\
+1 & x_n 
+\end{bmatrix}
+\quad \text{and} \quad
+\beta =
+\begin{bmatrix}
+\beta_0 \\
+\beta_1 
+\end{bmatrix} \, .
+$$
+
+:::
+
+
+::: {#exm-pr}
+
+The polynomial regression model 
+$$
+\E(Y_i) = \beta_0 + \beta_1 x_i + \beta_2 x_i^2 + \ldots + \beta_p x_i^{p} \qquad (i = 1, \ldots, n)
+$$
+has
+$$
+X =
+\begin{bmatrix}
+1 & x_1 & x_1^2 & \cdots & x_1^{p}\\
+1 & x_2 & x_2^2 & \cdots & x_2^{p}\\
+\vdots & \vdots & \vdots & \ddots & \vdots\\
+1 & x_n & x_n^2 & \cdots & x_n^{p}
+\end{bmatrix}
+\quad \text{and} \quad
+\beta =
+\begin{bmatrix}
+\beta_0 \\
+\beta_1 \\
+\vdots \\
+\beta_p 
+\end{bmatrix} \, .
+$$
+
+:::
+
+::: {#exm-mr}
+
+The multiple regression model 
+$$
+\E(Y_i) = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \ldots + \beta_p x_{ip} \qquad (i = 1, \ldots, n)
+$$
+has
+$$
+X =
+\begin{bmatrix}
+1 & x_{11} & x_{12} & \cdots & x_{1p} \\ 
+1 & x_{21} & x_{22} & \cdots & x_{2p} \\ 
+\vdots & \vdots & \vdots & \ddots & \vdots\\ 
+1 & x_{n1} & x_{n2} & \cdots & x_{np}
+\end{bmatrix}
+\quad \text{and} \quad
+\beta =
+\begin{bmatrix}
+\beta_0 \\
+\beta_1 \\
+\vdots \\
+\beta_p
+\end{bmatrix} \, .
+$$
+
+:::
+
+Strictly, the only requirement for a model to be linear is that the
+relationship between the response variables, $Y$, and any explanatory
+variables can be written in the form ([-@eq-lm-mat]). No further
+specification of the joint distribution of $Y_1, \ldots, Y_n$ is
+required.  However, statistical inference about the model parameters
+is conveniently performed under the *normal linear model*, which
+involves three further assumptions:
+
+1. $Y_1, \ldots, Y_n$ are independent random variables.
+2. $Y_1, \ldots, Y_n$ are normally distributed.
+3. $\var(Y_1) = \var(Y_2) = \cdots = \var(Y_n) = \sigma^2$ or, equivalently, $Y_1, \ldots, Y_n$ are homoscedastic.
+
+With these assumptions the linear model completely specifies the distribution
+of $Y$, in that $Y_1, \ldots, Y_n$ are independent and
+$$
+Y_i \sim \normal\left(x_i^\top \beta, \sigma^2\right) \qquad (i = 1, \ldots, n).
+$$
+Another way of writing this is
+$$
+Y_i = x_i^\top \beta + \epsilon_i \qquad (i = 1, \ldots, n) \, ,
+$$
+where $\epsilon_1, \ldots, \epsilon_n$ are independent and identically
+distributed (IID) random variables with $\epsilon_1 \sim
+\normal(0, \sigma^2)$.
+
+The normal linear model can now be expressed in matrix form as
+$$
+Y = X \beta + \epsilon \,,
+$$ {#eq-lm-mat-norm}
+
+where $\epsilon = (\epsilon_1, \ldots, \epsilon_n)^\top$ has a
+multivariate normal distribution with mean vector $0$ and variance
+covariance matrix $\sigma^2 I_n$, where $I_n$ is the $n \times n$
+identity matrix
+$$
+I_n = 
+\begin{bmatrix}
+1 & 0 & \ldots & 0 \\
+0 & 1 & \ldots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \ldots & 1
+\end{bmatrix} \,.
+$$
+This is because $\var(\epsilon_i) = \sigma^2$, and $\epsilon_1,
+\ldots, \epsilon_n$ are independent, which implies that
+$\cov(\epsilon_i, \epsilon_j) = 0$ $(i, j = 1, \ldots, n)$.
+
+It follows from ([-@eq-lm-mat-norm]) that the distribution of $Y$ is
+multivariate normal with mean vector $X \beta$ and variance covariance
+matrix $\sigma^2 I_n$, that is $Y \sim \normal(X\beta, \sigma^2 I_n)$.
+
+## Least squares estimation
+
+The regression coefficients $\beta_0, \ldots, \beta_p$ describe the
+pattern by which the response is associated with the explanatory
+variables.  We use the observed response values $y_1, \ldots, y_n$ to
+*estimate* that association.
+
+In least squares estimation, roughly speaking, we choose $\hat \beta$,
+the estimates of $\beta$, to make the estimated means $\widehat{\E(Y)}
+= X \hat\beta$ *as close as possible* to the observed values $y$,
+where closeness is determined in terms of the sum of squared
+errors. In other words, we seek $\hat\beta$ that minimises the sum of squares
+$$
+\begin{aligned}
+\sum_{i=1}^n \left\{y_i - \E(Y_i)\right\}^2 & = \sum_{i=1}^n \left(y_i - x_i^\top\beta\right)^2 \\
+ & = \sum_{i=1}^n \left(y_i - \sum_{j=0}^p x_{ij} \beta_j\right)^2 \, , 
+\end{aligned}
+$$ {#eq-sse}
+with respect to $\beta = (\beta_0, \ldots, \beta_p)^\top$.
+
+
+::: {#exr-LS}
+# Normal equations
+
+Differentiate the sum of squares in ([-@eq-sse]) with respect to
+$\beta_k$ ($k = 0, \ldots, p$), to show that $\hat\beta$ should satisfy
+$$
+X^\top X \hat\beta = X^\top y \, .
+$$ {#eq-normal-equations}
+
+:::
+
+The least squares estimates $\hat\beta$ are the solutions to the set
+of $p + 1$ simultaneous linear equations in
+([-@eq-normal-equations]), which are known as the *normal
+equations*. If $X^{\top}X$ is invertible (as it usually is) then the
+least squares estimates are given by
+$$
+\hat\beta= (X^\top X)^{-1} X^\top y \,.
+$$
+The corresponding fitted values are
+$$
+\begin{aligned}
+& \quad \hat{y} = X \hat\beta = X (X^\top X)^{-1} X^\top y \\
+\Rightarrow & \quad \hat{y}_i = x_i^\top \hat\beta \qquad (i = 1, \ldots, n)\,.
+\end{aligned}
+$$
+The matrix $H = X(X^\top X)^{-1} X^\top$ is typically called the *hat* matrix, because 
+$\hat{y} = H y$, that is $H$ "puts a hat" on $y$. The *residuals* are
+$$
+\begin{aligned}
+& \quad e = y-\hat{y} = y - X\hat\beta = (I_n - H) y \\
+\Rightarrow & \quad e_i = y_i - x_i^\top \hat\beta \qquad (i = 1, \ldots, n) \, .
+\end{aligned}
+$$
+
+The residuals describe the variability in the observed responses $y_1,
+\ldots, y_n$, which has not been explained by the linear model. The
+*residual sum of squares* or *deviance* for a linear model is defined
+to be
+$$
+D = \sum_{i=1}^n e_i^2 =\sum_{i=1}^n \left(y_i - x_i^\top \hat\beta \right)^2 \, ,
+$$
+and is the minimum value that the sum of squared errors in ([-@eq-sse]) attains.
+
+::: {#exr-LS-properties}
+# Properties of the least squares estimator
+
+1.  Show that $\hat\beta$ is multivariate normal with mean $\E(\hat\beta) = \beta$, and variance covariance matrix $\var(\hat{\beta}) = \sigma^2(X^\top X)^{-1}$.
+
+2. Assuming that $\epsilon_1, \ldots, \epsilon_n$ are independent and identically distributed with $\epsilon_1 \sim \normal(0, \sigma^2)$ , show that the least squares estimate $\hat\beta$ is also the maximum likelihood estimate. To do that start by showing that the likelihood for the normal linear model is
+$$
+f_{Y}(y; \beta, \sigma^2) = \left(2 \pi \sigma^2 \right)^{-{n\over 2}}
+\exp\left(-\frac{1}{2\sigma^2} \sum_{i=1}^n (y_i - x_i^\top \beta)^2\right) \,.
+$$ {#eq-lm-lik}
+
+:::
+
+## Estimation of $\sigma^2$ {#sec-est-sigma}
+
+In addition to the linear coefficients $\beta_0, \ldots, \beta_p$
+estimated using least squares, we also need to estimate the *error
+variance* $\sigma^2$, which represents the variability of the
+observations about their mean.
+
+We can estimate $\sigma^2$ using maximum likelihood. Maximising ([-@eq-lm-lik])
+with respect to $\beta$ and $\sigma^2$ gives
+$$
+\hat{\sigma}^2={D\over n}={1\over n}\sum_{i=1}^n e_i^2 \, .
+$$
+Under the assumptions of the normal linear model, $D$ is independent of $\hat\beta$ and
+$$
+\frac{D}{\sigma^2} \sim \chi^2_{n-p-1} \, .
+$$
+Hence,
+$$
+\E(\hat\sigma^2) = \frac{n-p-1}{n} \sigma^2 \, .
+$$
+As a result, the maximum likelihood estimator for $\sigma^2$ is biased
+for fixed $p$, and is only asymptotically unbiased because
+$(n-p-1)/n \to 1$ as $n\to\infty$. For this reason, we usually
+prefer to use the unbiased estimator of $\sigma^2$
+$$
+s^2 = \frac{D}{n-p-1} = \frac{1}{n-p-1} \sum_{i=1}^n e_i^2 \, .
+$$
+The denominator $n - p -1$ is the number of observations minus the
+number of coefficients in the model, and is called the *degrees of
+freedom* of the model. We estimate the error variance by
+the deviance divided by the degrees of freedom.
+
+## Inference {#sec-lm-inf}
+
+From the distribution of $\hat\beta$ under the normal linear model
+(see @exr-LS-properties), it follows that 
+$$
+\frac{\hat\beta_k-\beta_k}{\sigma[(X^{\top}X)^{-1}]_{kk}^{1/2}} \sim \normal(0, 1) \qquad (k = 0, \ldots, p) \,.
+$$
+Replacing the unknown parameter $\sigma$ with its estimate $s$, the definition of the $t$ distribution gives that 
+$$
+T_k = \frac{\hat\beta_k-\beta_k}{s[(X^{\top}X)^{-1}]_{kk}^{1/2}}\sim t_{n-p-1}\, .
+$$
+Hence, $T_k$ is a pivotal quantity (function of the random variables
+and parameters, whose distribution does not depend on the parameters),
+and can be used for constructing inferences about $\beta_k$ in the
+form of confidence intervals and test of hypotheses of the form $H_0:
+\beta_k = b$.
+
+The denominator $s.e.(\hat\beta_k) = s[(X^{\top}X)^{-1}]_{kk}^{1/2}$
+is called the estimated standard error for $\hat\beta_k$.
+
+The sampling distributions of the fitted values and residuals can be
+obtained, straightforwardly as
+$$
+\hat y\sim \normal(X\beta, \sigma^{2} H) \,,
+$$
+and
+$$
+e \sim \normal(0,\sigma^{2}(I_n - H)) \,.
+$$
+The latter expression allows us to calculate *standardised* residuals,
+for comparison purposes, as
+$$
+r_i={{e_i}\over{s(1-h_{ii})^{1/2}}} \,,
+$$
+where $h_{ii}$ is the $i$th diagonal element of the hat matrix $H$.
+
+## Prediction
+
+We estimate the mean, $x_{+}^\top \beta$, for $Y$ at values of the
+explanatory variables given by $x_+^\top = (1, x_{+1}, \ldots,
+x_{+p})^\top$, which may or may not match a set of values observed in
+the data, using
+$$
+\hat Y_{+} = x_{+}^\top\hat\beta \,.
+$$
+Then,
+$$
+\hat Y_{+} \sim N(x_{+}^\top \beta, \sigma^{2}h_{++}) \,,
+$$
+where $h_{++} = x_{+}^\top (X^\top X)^{-1} x_{+}$. Hence, confidence
+intervals for predictive means can be derived using
+$$
+\frac{\hat Y_+ - x_+^\top \beta}{s h_{++}^{1/2}} \sim t_{n-p-1} \,.
+$$
+
+For predicting the actual value $Y_+ = x_{+}^\top \beta + \epsilon_+$, the predictor $\hat Y_{+}$
+is also sensible, as $\E(\hat Y_{+} - Y_{+}) = 0$. 
+Now,
+$$
+\hat Y_{+} - Y_{+}\sim N(0,\sigma^{2}(1+h_{++})) \, ,
+$$
+because $\hat Y_+$ and $Y_+$ are independent. Hence, predictive
+confidence intervals can be derived using
+$$
+\frac{\hat Y_+ - Y_+}{s(1 + h_{++})^{1/2}} \sim t_{n-p-1}.
+$$
+
+
+## Comparing linear models
+
+This section describes just one method for comparing models. General
+principles and other methods will be discussed in detail in the APTS
+module itself.
+
+A pair of *nested* linear models can be compared using a generalised
+likelihood ratio test. Nesting implies that the simpler model ($H_0$)
+is a special case of the more complex model ($H_1$). In practice, this
+usually means that the explanatory variables present in $H_0$ are a
+subset of those present in $H_1$. Let $\Theta^{(1)}$ be the
+unrestricted parameter space under $H_1$ and $\Theta^{(0)}$ be the
+parameter space corresponding to model $H_0$, which sets some of the
+coefficients to zero.
+
+Without loss of generality, we can think of $H_1$ as the model
+$$
+\E(Y_i) = \sum_{j=0}^p x_{ij} \beta_j \qquad (i = 1, \ldots, n)
+$$
+with $H_0$ being the same model with $\beta_{q+1} = \beta_{q+2} = \cdots = \beta_{p} = 0$.
+
+A *generalised likelihood ratio test* of $H_0$ against $H_1$ uses a test statistic of the form
+$$
+T = \frac{\max_{(\beta,\sigma^2)\in \Theta^{(1)}}f_{Y}(y;\beta,\sigma^2)}{\max_{(\beta,\sigma^2)\in \Theta^{(0)}}f_{Y}(y;\beta,\sigma^2)} \, .
+$$
+Then, $H_0$ is rejected in favour of $H_1$ when $T > k$, where where
+$k$ is determined by $\alpha$, the size of the test.
+
+For a normal linear model,
+$$
+f_{Y}(y;\beta,\sigma^2)=\left(2\pi\sigma^2\right)^{-{n\over 2}}
+\exp\left(-{1\over{2\sigma^2}} \sum_{i=1}^n (y_i-x_i^{\top}\beta)^2\right).
+$$
+
+This is maximised with respect to $(\beta,\sigma^2)$ for $\beta :=
+\hat{\beta}$ and $\sigma^2 := \hat{\sigma}^2=D/n$. So,
+$$
+\begin{aligned}
+\max_{\beta,\sigma^2} f_{Y}(y;\beta,\sigma^2)&=(2\pi D/n)^{-{n\over 2}}
+\exp\left(-{n\over{2D}} \sum_{i=1}^n (y_i-x_i^{\top}\hat{\beta})^2\right) \\
+&=(2\pi D/n)^{-{n\over 2}}
+\exp\left(-{n\over2}\right)
+\end{aligned}
+$$
+
+::: {#exr-deviance-LS}
+
+# Likelihood ratio statistic and $F$ tests in the normal linear model
+
+Denote the deviances under models $H_0$ and $H_1$ as $D_0$ and $D_1$,
+respectively. Show that the likelihood ratio test statistic $T$ above
+can be written as
+$$
+T = \left(1 + \frac{p-q}{n-p-1} F\right)^{n/2} \,,
+$$
+where
+$$
+F = \frac{(D_0 - D_1)/(p-q)}{D_1/(n-p-1)} \, .
+$$
+Hence, the simpler model $H_0$ is rejected in favour of the more complex model $H_1$ if
+$F$ is `too large'.
+
+:::
+
+As we have required $H_0$ to be nested in $H_1$ then, under $H_0$, $F$
+has an F distribution with $p - q$ degrees of freedom in the numerator
+and $n-p-1$ degrees of freedom in the denominator.
+
+To see this, note the analysis of variance decomposition
+$$
+\frac{D_0}{\sigma^2}= \frac{D_0-D_1}{\sigma^2} + \frac{D_1}{\sigma^2}.
+$$
+
+We know from @sec-est-sigma that, under $H_0$, $D_1 / \sigma^2$ has a
+$\chi^2_{n-p-1}$ distribution and $D_0 / \sigma^2$ has a $\chi^2_{n - q}$
+distribution.  It is also true (although we do not show it here) that
+under $H_0$, $(D_0 - D_1)/\sigma^2$ and $D_0/\sigma^2$ are independent.
+From the properties of the chi-squared distribution, it
+follows that under $H_0$, $(D_0 - D_1)/\sigma^2$ has a $\chi^2_{p-q}$
+distribution, and $F$ has a $F_{p-q, n-p-1}$ distribution.
+
+Hence, $H_0$ is rejected in favour of $H_1$ when $F>k$ where $k$
+is the $100(1 - \alpha)\%$ point of the $F_{p-q, n-p-1}$ distribution.
+
+## Model checking {#sec-lm-checking}
+
+Confidence intervals and hypothesis tests for normal linear models may
+be unreliable if some of the model assumptions are not justified.  In
+particular, we have made four assumptions about the distribution of
+$Y_1, \ldots, Y_n$.
+
+1. The model correctly describes the relationship between $\E(Y_i)$ and the explanatory variables.
+
+2. $Y_1, \ldots, Y_n$ are normally distributed.
+
+3. $\var(Y_1) = \var(Y_2) = \cdots = \var(Y_n)$.
+
+4. $Y_1, \ldots, Y_n$ are independent random variables.
+
+Evidence of departures from the above assumptions can be explored
+using plots of raw or standardised residuals.
+
+1. If a plot of the residuals against the values of a potential
+explanatory variable reveals a pattern, then this suggests that the
+explanatory variable, or perhaps some function of it, should be
+included in the model.
+
+2. A simple check for non-normality is obtained using a normal
+probability plot of the ordered residuals. The plot should look like
+a straight line, with obvious curves suggesting departures from
+normality.
+
+3. A simple check for non-constant variance is obtained by plotting
+the residuals $r_1, \ldots, r_n$ against the corresponding fitted
+values $x_i^\top \hat{\beta}$ $(i = 1, \ldots, n)$. The plot should
+look like a random scatter. If any patterns are apparent, for example
+increasing or decreasing variance as the fitted values increase
+('funnelling' in the residual plot), then this is evidence against the
+homoscedasticity assumptions.
+
+4. Independence is typically difficult to validate. Nevertheless, if
+observations have been collected in serial order, serial correlation
+may be detected by a lagged scatterplot or correlogram of the
+residuals.
+
+Another place where residual diagnostics are useful is in assessing
+*influence*. An observation is influential if deleting it would lead
+to substantial changes in the estimates of model parameters. Cook's
+distance is a measure of the change in $\hat\beta$ when
+observation $j$ is omitted from the dataset, and is defined as
+$$
+C_j = \frac{\sum_{i=1}^n \left(\hat{y}^{(j)}_i-\hat{y}_i\right)^2}{p s^2}
+$$
+where $\hat{y}^{(j)}_i$ is the fitted value for observation $i$,
+calculated using the least squares estimates obtained from the
+modified data set with the $j$th observation deleted.  A rule of thumb
+is that values of $C_j$ greater than $8/(n-2p)$ indicate influential
+points.  It can be shown that
+$$
+C_j = \frac{r_j^2h_{jj}}{p(1-h_{jj})}
+$$
+so influential points have either a large standardised residual
+(unusual $y$ value) or large $h_{jj}$. The quantity $h_{jj}$ is called
+the *leverage*, and is a measure of how unusual (relative to the other
+values in the data set) the explanatory data for the $j$th observation
+are.
+
+
+::: {#exr-leverage}
+# Basic properties of the hat matrix and the leverage
+
+1. Show that $H$ is idempotent. 
+
+2. Show that $h_{ii} \in (0, 1)$ and that $\tr(H) = \sum_{i = 1}^n
+   h_{ii} = p$, where $\tr(H)$ denotes the trace of the matrix $H$.
+
+:::
+
+
+## Bayesian inference for linear models
+
+Bayesian inference for the parameters $\beta$ and $\sigma^2$ of the
+normal linear model requires computation of the posterior
+density. Bayes theorem gives us
+$$
+f(\beta,\sigma^2 \mid y) \propto f(y \mid \beta,\sigma^2) f(\beta, \sigma^2) \, ,
+$$
+where the likelihood $f(y \mid \beta, \sigma^2)$ is given by ([-@eq-lm-lik]) as
+$$
+f(y \mid \beta, \sigma^2) = \left(2\pi\sigma^2\right)^{-\frac{n}{2}}
+\exp\left(-\frac{1}{2\sigma^2} \sum_{i=1}^n (y_i - x_i^\top\beta)^2\right) \, .
+$$
+
+Posterior computation is straightforward if the prior density $f(\beta, \sigma^2)$ is conjugate to the likelihood, which, for a normal linear model, is achieved by the prior decomposition
+$$
+\sigma^{-2} \sim \gamma(a_0, b_0) \quad \text{and} \quad
+\beta\,|\,\sigma^2 \sim \normal(\mu_0, \sigma^2V_0) \,,
+$$
+where $a_0$, $b_0$, $\mu_0$, and $V_0$ are hyperparameters, whose values are chosen to reflect prior uncertainty about the linear model parameters $\beta$ and $\sigma^2$.
+
+With this prior structure, the corresponding posterior distributions are given by
+$$
+\sigma^{-2} \sim \gamma(a_0+n/2,b) 
+\quad \text{and} \quad
+\beta\,|\,\sigma^2 \sim \normal(\mu, \sigma^2V) \,,
+$$
+where $V=(X^\top X + V_0^{-1})^{-1}$, $\mu = V(X^\top y + V_0^{-1} \mu_0)$ and
+$$
+\begin{aligned}
+b & = b_0 + \frac{1}{2}\left( y^\top y + \mu_0 V_0^{-1} \mu_0 - \mu V^{-1}\mu  \right) \\
+& = b_0 + \frac{1}{2} \left\{ (n-p-1) s^2 + \left[\mu_0 - \hat\beta\right]^\top \left[V_0+(X^\top X)^{-1}\right]^{-1} \left[\mu_0 - \hat\beta\right] \right\} \,, 
+\end{aligned}
+$$
+if $X^{\top}X$ is non-singular, where $\hat\beta$ and $s^2$ are the classical unbiased estimators for $\beta$ and $\sigma^2$.
+
+In applications where prior information about the model parameters $\beta$ and $\sigma^2$ is weak, it is conventional to use the vague prior specification given by the improper prior density
+$$
+f(\beta,\sigma^2) \propto \sigma^{-2}.
+$$ {#eq-vague-prior}
+This corresponds to the conjugate prior structure above with $a_0 = -(p+1)$, $b_0 = 0$ and $V_0^{-1} = 0$.
+
+::: {#exr-bayes-lm}
+# Links between Bayesian and frequentist inference for the normal linear model
+
+1. Show that, for the vague prior specification in ([-@eq-vague-prior]), the posterior mean of $\beta$ is the least squares estimator $\hat\beta$. Show also that, *a posteriori*,  $1/\sigma^2$ has the distribution of $X^2/[s^2(n-p-1)]$, where $X^2$ has a $\chi^2_{n-p-1}$ distribution. Hence, show that posterior probability intervals for $\sigma^2$ are equivalent to confidence intervals based on the sampling distribution of $s^2$. 
+
+2. For a longer exercise, show that
+$(\beta - \mu) / \sigma$ has a multivariate normal posterior marginal distribution, independent of $\sigma^2$, and hence that posterior probability intervals for a coefficient $\beta_k$ are equivalent to the confidence intervals based on the sampling distribution of $T_k$ derived in @sec-lm-inf above.
+
+:::
+
+

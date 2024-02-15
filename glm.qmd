@@ -1,0 +1,575 @@
+::: {.content-hidden}
+{{< include resources/_macros.tex >}}
+:::
+
+# Generalized linear models
+
+## Introduction {#sec-glm-intro}
+
+The generalized linear model extends the normal linear model defined
+in @sec-lm-intro to allow a more flexible family of probability
+distributions.
+
+Suppose that $y_1, \ldots, y_n$ are observations on random variables
+$Y_1, \ldots, Y_n$ that are conditionally independent given $x_1,
+\ldots, x_n$, where $x_i$ is a $p$-vector of covariates. A generalized
+linear model (GLM) assumes that, conditionally on $x_i$, $Y_i$ has an
+exponential family distirbution with density or probability mass function
+$$
+f_{Y}(y; \theta, \phi) = \exp\left(\sum_{i=1}^n \frac{y_i \theta_i - b(\theta_i)}{\phi_i}
++\sum_{i=1}^n c(y_i,\phi_i)\right) \, ,
+$$ {#eq-glm}
+where $\theta = (\theta_1, \ldots, \theta_n)^\top$ is the collection of
+canonical parameters and $\phi = (\phi_1, \ldots , \phi_n)^\top$ is the
+collection of dispersion parameters (where they exist).  Commonly, the
+dispersion parameters are known up to, at most, a single common
+unknown $\sigma^2$, and we write $\phi_i = \sigma^2 / m_i$ where the $m_i$
+represent known weights.
+
+The distribution of the response variable $Y_i$ depends on the
+explanatory data $x_i=(1, x_{i1}, x_{i2}, \ldots, x_{ip})^{\top}$
+through the *linear predictor* $\eta_i$, where
+$$
+\begin{aligned}
+\eta_i & = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \ldots + \beta_p x_{ip} \\
+& = \sum_{j=0}^p x_{ij} \beta_j \\
+&= x_i^{\top}\beta \\
+& = [X\beta]_i \qquad (i = 1, \ldots, n) \,,
+\end{aligned}
+$$
+in an exactly analagous fashion to the linear model in @sec-lm-intro.
+
+The distribution of $Y$ is linked to the linear predictor $\eta$
+through the *link function* $g$ as
+$$
+\eta_i = g(\mu_i) \qquad  (i = 1, \ldots, n) \, ,
+$$
+where $\mu_i = E(Y_i)$. 
+
+<!-- Hence, the dependence of the -->
+<!-- distribution of the response on the explanatory variables is -->
+<!-- established as -->
+<!-- $$ -->
+<!-- g(E[Y_i]) = g(\mu_i) = \eta_i = x_i^{\top}\beta \qquad  (i = 1, \ldots, n) \, . -->
+<!-- $$ -->
+
+In principle, the link function $g$ can be any one-to-one
+differentiable function. However, we note that $\eta_i$ can in
+principle take any value in $\Re$, because we make no restriction on
+possible values taken by explanatory variables or model
+parameters. However, for some exponential family distributions $\mu_i$
+is restricted.  For example, for the Poisson distribution $\mu_i \in
+\Re^+$; for the Bernoulli distribution $\mu_i \in (0,1)$.  If $g$ is
+not chosen carefully, then there may exist a combination of $x_i$ and
+$\beta$ such that $\eta_i \ne g(\mu_i)$ for any possible value of
+$\mu_i$.  Most common choices of link function map the set of allowed
+values for $\mu_i$ onto $\mathbb{R}$.
+
+Recall that for a random variable $Y$ with an exponential family
+distribution, $E(Y)=b'(\theta)$. Hence, for a generalized linear model
+$$
+\mu_i = E(Y_i) = b'(\theta_i) \qquad (i = 1, \ldots, n)\,.
+$$
+So,
+$$
+\theta_i = b'^{-1}(\mu_i) \qquad (i = 1, \ldots, n)\,,
+$$
+and, because $g(\mu_i) = \eta_i = x_i^{\top}\beta$, 
+$$
+\theta_i = b'^{-1} (g^{-1}(x_i^{\top}\beta)) \qquad (i = 1, \ldots, n)\,.
+$$ {#eq-link}
+Hence, we can express the joint density ([-@eq-glm]) in terms of the
+coefficients $\beta$, and for observed data $y$, this is the
+likelihood $f_{Y}(y;\beta,\phi)$ about $\beta$.
+
+Note that considerable simplification is obtained in ([-@eq-glm])
+and ([-@eq-link]) if the functions $g$ and $b'^{-1}$ are identical. Then,
+$$
+\theta_i = x_i^{\top}\beta \qquad (i = 1, \ldots, n)\, .
+$$
+The link function
+$$
+g(\mu) = b'^{-1}(\mu)
+$$
+is called the *canonical* link function. Under the canonical link, the 
+canonical parameter is equal to the linear predictor.
+
+| Distribution            | Normal               | Poisson          | Bernoulli/Binomial                |
+|-------------------------|----------------------|------------------|-----------------------------------|
+| $b(\theta)$             | ${1\over 2}\theta^2$ |                  |                                   |
+| $b'(\theta) = \mu$      | $\theta$             |                  | $\frac{\exp\theta}{1+\exp\theta}$ |
+| $b'^{-1}(\mu) = \theta$ | $\mu$                |                  | $\log{\frac{\mu}{1-\mu}}$         |
+| **Canonical link**      | $g(\mu)=\mu$         | $g(\mu)=\log\mu$ | $g(\mu)=\log{\frac{\mu}{1-\mu}}$  |
+| **Name of link**        | Identity link        | Log link         | Logit link                        |
+: Canonical link functions {#tbl-glm-canon} 
+
+::: {#exr-poisson-glm}
+# GLM characteristics
+
+Complete @tbl-glm-canon.
+
+:::
+
+
+Clearly the linear model considered in @sec-lm is also a generalized
+linear model where $Y_1, \ldots, Y_n$ are independent and normally
+distributed, the explanatory variables enter the model through the
+linear predictor
+$$
+\eta_i = x_i^{\top}\beta \qquad (i = 1, \ldots, n)\,,
+$$
+and the link between $E(Y) = \mu$ and the linear predictor
+$\eta$ is through the (canonical) identity link function
+$$
+\mu_i = \eta_i \qquad (i = 1, \ldots, n)\,.
+$$
+
+## Maximum likelihood estimation
+
+As usual, we maximize the log likelihood function
+which, from ([-@eq-glm]), can be written as
+$$
+\log f_{Y}(y;\beta,\phi) =
+\sum_{i=1}^n\frac{y_i\theta_i-b(\theta_i)}{\phi_i} +\sum_{i=1}^n c(y_i, \phi_i) \,,
+$$ {#eq-glm-loglik}
+and depends on $\beta$ through expression ([-@eq-link]) for the canonical parameters.
+
+The maximum likelihood estimate $\hat\beta$ satisfies $u(\hat\beta) = 0$ where $u$ is the *score* vector whose components are given by
+$$
+\begin{aligned}
+u_k(\beta) & \equiv{\partial\over{\partial\beta_k}}\log f_{Y}(y;\beta)  \\
+& = \sum_{i=1}^n{\partial\over{\partial\beta_k}}
+\left[{{y_i\theta_i - b(\theta_i)}\over{\phi_i}}\right]  \\
+&=\sum_{i=1}^n{\partial\over{\partial\theta_i}}\left[{{y_i\theta_i-b(\theta_i)}
+\over{\phi_i}}\right]{{\partial\theta_i}\over{\partial\mu_i}}
+{{\partial\mu_i}\over{\partial\eta_i}}{{\partial\eta_i}\over{\partial\beta_k}}  \\
+&=\sum_{i=1}^n{{y_i-b'(\theta_i)}\over{\phi_i}}
+{{x_{ik}}\over{b''(\theta_i)g'(\mu_i)}}  \\
+&=\sum_{i=1}^n{{y_i-\mu_i}\over{\var(Y_i)}}
+{{x_{ik}}\over{g'(\mu_i)}} \qquad (k = 0, \ldots, p)\,,
+\end{aligned}
+$$ {#eq-glm-score}
+which depends on $\beta$ through $\mu_i =  E(Y_i)$ and $\var(Y_i)$ 
+$(i = 1, \ldots, n)$.
+
+The equations $u(\hat\beta) = 0$ are usually non-linear and have no
+analytic solution.  For that reason, we rely on numerical methods to
+solve them.
+
+First, we note that the Hessian and Fisher information matrices
+can be derived directly from ([-@eq-glm-score]), as
+$$
+\begin{aligned}
+[H(\beta)]_{jk}&={{\partial^2}\over{\partial\beta_j\partial\beta_k}}\log f_{Y}(y;\beta) \\
+&={\partial\over{\partial\beta_j}}\sum_{i=1}^n{{y_i-\mu_i}\over{\var(Y_i)}}
+{{x_{ik}}\over{g'(\mu_i)}} \\ 
+&=\sum_{i=1}^n{{-{{\partial\mu_i}\over{\partial\beta_j}}}\over{\var(Y_i)}}
+{{x_{ik}}\over{g'(\mu_i)}}+\sum_{i=1}^n(y_i-\mu_i){\partial\over{\partial\beta_j}}
+\left[{{x_{ik}}\over{\var(Y_i)
+g'(\mu_i)}}\right]\,, \\
+\end{aligned}
+$$
+and
+$$
+[{\cal I}(\beta)]_{jk} = E(-H(\beta))_{jk}
+=\sum_{i=1}^n{{{{\partial\mu_i}\over{\partial\beta_j}}}\over{\var(Y_i)}}
+{{x_{ik}}\over{g'(\mu_i)}}
+=\sum_{i=1}^n{{x_{ij}x_{ik}}\over{\var(Y_i)g'(\mu_i)^2}} \,.
+$$
+
+::: {#exr-fisher-info}
+# Fisher information matrix
+Show that the Fisher information matrix can be written as
+$$
+I(\beta) = X^{\top} W X \, ,
+$$ {#eq-I-XtWX} 
+where $X$ is the model matrix and
+$$
+W = {\rm diag}(w) =
+\begin{bmatrix}
+w_1 & 0 & \cdots & 0 \\
+0 & w_2 & & \vdots \\
+\vdots & & \ddots & 0 \\ 
+0 & \cdots & 0 & w_n 
+\end{bmatrix}\, ,
+$$
+where
+$$
+w_i = {1\over{\var(Y_i)g'(\mu_i)^2}}  \qquad (i = 1, \ldots, n) \, .
+$$
+
+:::
+
+The Fisher information matrix ${\cal I}(\beta)$ depends on $\beta$ through
+$\mu_i$ and $\var(Y_i)$ $(i = 1, \ldots, n)$.
+
+The scores in ([-@eq-glm-score]) may now be written as
+$$
+\begin{aligned}
+u_k(\beta) & =\sum_{i=1}^n (y_i-\mu_i) x_{ik} w_i g'(\mu_i) \\ 
+& = \sum_{i=1}^n x_{ik} w_i z_i \qquad (k = 0, \ldots, p) \,,
+\end{aligned}
+$$
+where
+$$
+z_i = (y_i-\mu_i) g'(\mu_i) \qquad (i = 1, \ldots, n) \, .
+$$
+Hence,
+$$
+u(\beta)= X^{\top} W z \,. 
+$$ {#eq-glm-score-mat}
+
+One possible method to solve the $p$ simultaneous equations
+$u(\beta) = 0$ is the Newton-Raphson method. If $\beta^{t}$ is the current estimate of $\beta$, then the next estimate is
+$$
+\beta^{t+1} = \beta^{t} - H(\beta^{t})^{-1} u(\beta^{t}) \,.
+$$ {#eq-NR-it}
+A popular alternative to Newton-Raphson replaces $H(\beta)$ in
+([-@eq-NR-it]) with $E(H(\beta)) = -I(\beta)$. If $\beta^{t}$ is the
+current estimate of $\beta$, the next estimate is
+$$
+\beta^{t+1}=\beta^{t}+{\cal I}(\beta^{t})^{-1}u(\beta^{t}) \,.
+$$ {#eq-FS-it}
+The resulting iterative algorithm is called *Fisher scoring*.
+Notice that if we substitute ([-@eq-I-XtWX]) and ([-@eq-glm-score-mat]) into ([-@eq-FS-it]) we get
+$$
+\begin{aligned}
+\beta^{t+1}&=\beta^{t}+[X^{\top}W^tX]^{-1}X^{\top}W^tz^t \\
+&=[X^{\top}W^tX]^{-1}[X^{\top}W^tX\beta^{t}+X^{\top}W^tz^t] \\ 
+&=[X^{\top}W^tX]^{-1}X^{\top}W^t[X\beta^{t}+z^t] \\
+&=[X^{\top}W^tX]^{-1}X^{\top}W^t[\eta^{t}+z^t] \,,
+\end{aligned}
+$$
+where $\eta^{t}$, $W^t$, and $z^t$ are $\eta$, $W$ and $z$ evaluated at $\beta^t$.
+
+As is clear, $\beta^{t+1}$ are estimates from a weighted linear
+regression model of the, so called, *working variates* $\eta^t + z^t$
+on $X$ with weights $W^t$. Equivalently, $\beta^{t+1}$ minimizes the
+weighted sum of squares
+$$
+(\eta^t + z^t - X b)^{\top} W^t (\eta^t + z^t - X b) =
+\sum_{i=1}^n w_i^t \left(\eta_i^t + z_i^t - x_i^{\top}b\right)^2 \,,
+$$
+with respect to $b$. 
+
+The Fisher scoring algorithm proceeds as follows:
+
+0. Choose an initial estimate $\beta^0$ for \beta$ and a small constant $\epsilon > 0$
+
+For $t = 0, 1, \ldots$, do:
+
+1. Evaluate $\eta^t$, $W^t$ and $z^t$ at $\beta^t$.
+2. Calculate $\beta^{t+1} = [X^{\top}W^tX]^{-1} X^{\top} W^t[\eta^{t}+z^t]$.
+3. If $||\beta^{t+1}-\beta^t|| > \epsilon$ then set $t\to t+1$ and go to 2.
+4. Use $\beta^{t+1}$ as the value for $\hat\beta$.
+
+As this algorithm involves iteratively minimising a weighted sum
+of squares, it is also known as *iteratively (re)weighted least squares*.
+
+Recall that the canonical link function is  $g(\mu) = b'^{-1}(\mu)$ and with this link $\eta_i=g(\mu_i)=\theta_i$. Then,
+$$
+{1\over{g'(\mu_i)}}
+={{\partial\mu_i}\over{\partial\theta_i}}=b''(\theta_i)\qquad i = 1, \ldots, n.
+$$
+As a result, $\var(Y_i)g'(\mu_i)=\phi_i$, which does not depend on
+$\beta$. It follows that
+${\partial\over{\partial\beta_j}}\left[{{x_{ik}}\over{\var(Y_i)g'(\mu_i)}}\right]=0$
+$(j = 0, \ldots, p)$.  It follows that $H(\beta) = -I(\beta)$ and, for
+the canonical link, Newton-Raphson and Fisher scoring are
+equivalent.
+
+::: {#exr-IWLS-lm}
+# IWLS for the normal linear model 
+
+
+For the normal linear model, show that $w_i = \sigma^{-2}$ and $z_i =
+y_i - \eta_i$ $(i = 1, \ldots, n$). Hence, show that the Fisher
+scoring algorithm converges in a single iteration, from any starting
+point, to the usual least squares estimate.
+
+:::
+
+## Inference {#sec-glm-inf}
+
+Subject to standard regularity conditions, ${\cal
+I}(\beta)^{1/2}(\hat\beta - \beta)$ is asymptotically normally
+distributed with mean $0$ and variance covariance matrix $I_p$.  So,
+we can treat the normal distribution with mean $\beta$ and variance
+${\cal I}(\beta)^{-1}$ as the approximate distribution of $\hat\beta$.
+
+Hence, standard errors can be estimated as
+$$
+[{\cal I}(\hat{\beta})^{-1}]_{kk}^{{1\over 2}}
+= [(X^{\top}\hat{W}X)^{-1}]_{kk}^{{1\over 2}}
+\qquad (k = 0, \ldots, p)\,,
+$$
+
+where $\hat{W}$ is $W$ evaluated at $\hat\beta$ and $\hat\phi_i$, if
+$\var(Y_i)$ depends on an unknown dispersion
+parameter. @sec-glm-unknown-disp discusses the estimation of $\phi_i$
+in models with unknown dispersion parameter.
+
+The asymptotic distribution of the maximum likelihood estimator can be
+used to provide asymptotically valid confidence intervals, and
+hypeotheris testing procedures, using
+$$
+{{\hat{\beta}_k-\beta_k}\over{[(X^{\top}\hat{W}X)^{-1}]_{kk}^{{1\over 2}}}} \;\;{\buildrel{\rm
+asymp}\over\sim}\;\; \normal(0,1) \, .
+$$
+
+## Comparing generalized linear models
+
+This section describes just one method for comparing models. General
+principles and other methods will be discussed in detail in the APTS
+module itself.
+
+As with linear models, we can proceed by comparing nested models $H_0$
+and $H_1$ using a generalized likelihood ratio test. Nested means that
+$H_0$ and $H_1$ are based on the same exponential family, have the
+same link function, but $\Theta^{(0)}$, the set of values of the
+canonical parameter $\theta$ allowed by $H_0$, is a subset of
+$\Theta^{(1)}$, the set of values allowed by $H_1$.
+
+Without loss of generality, we can think of $H_1$ as the model
+$$
+\eta_i=\sum_{j=0}^p x_{ij} \beta_j \qquad (i = 1, \ldots, n)\,,
+$$
+and $H_0$ is the same model with $\beta_{q+1} = \beta_{q+2} = \cdots =
+\beta_p = 0$.
+
+Now, the log likelihood ratio statistic for a test of $H_0$ against $H_1$ is
+$$
+\begin{aligned}
+L_{01} & \equiv 2\log \left({{\max_{\theta\in \Theta^{(1)}}f_{Y}(y;\theta)}\over
+{\max_{\theta\in \Theta^{(0)}}f_{Y}(y;\theta)}}\right)  \\
+&=2\log f_{Y}(y;\hat{\theta}^{(1)})-2\log f_{Y}(y;\hat{\theta}^{(0)})
+\end{aligned}
+$$ {#eq-glm-lr}
+where $\hat{\theta}^{(1)}$ and $\hat{\theta}^{(0)}$ result from
+$b'(\hat{\theta}_i^{(j)})=\hat{\mu}_i^{(j)}$,
+$g(\hat{\mu}_i^{(j)})=\hat{\eta}_i^{(j)}$ $(i = 1, \ldots, n)$ where
+$\hat{\eta}^{(j)}$ is the linear predictor evaluated at the maximum
+likelihood estimate for $\beta$ under hypothesis $H_j$ $(j = 0, 1)$.
+Here, we assume that $\phi_i$ $(i = 1, \ldots, n$) are known; the case
+of unknown $\phi$ is discussed in @sec-glm-unknown-disp.
+
+We reject $H_0$ in favour of $H_1$ when $L_{01} > k$ where $k$ is
+determined by the size $\alpha$ of the test. Under $H_0$, $L_{01}$ has
+an asymptotic chi-squared distribution with $p - q$ degrees of
+freedom.
+
+The *saturated* model is defined to be the model where the canonical
+parameters $\theta$ (or equivalently $\mu$ or $\eta$) are
+unconstrained, and the parameter space is $n$-dimensional.  For the
+saturated model, we can calculate the maximum likelihood estimators
+$\hat{\theta}$ directly from their likelihood ([-@eq-glm]) by
+differentiating with respect to $\theta_1, \ldots , \theta_n$ to give
+$$
+{\partial\over{\partial\theta_k}}\log f_{Y}(y;\theta)={{y_k-b'(\theta_k)}
+\over{\phi_k}}\qquad k=1,\ldots ,n.
+$$
+Therefore $b'(\hat{\theta}_k) = y_k$ $(k=1, \ldots, n)$, and, hence,
+$\hat{\mu}_k = y_k$ $(k = 1, \ldots, n)$. Hence, the saturated model
+fits the data perfectly, as the *fitted values* $\hat{\mu}_k$ and
+observed values $y_k$ are the same for every observation. The
+saturated model is rarely of any scientific interest in its own right.
+It is overly parameterized, having as many parameters as there are
+observations.  However, every other model is necessarily nested in the
+saturated model, and a test comparing a model $H_0$ against the
+saturated model can be interpreted as a goodness of fit test. If there
+is no significant evidence that the saturated model --- which fits the
+observed data perfectly --- provides a better fit than model $H_0$, we
+can conclude that $H_0$ is an acceptable fit to the data.
+
+From ([-@eq-glm-lr]), the log likelihood ratio statistic for a test
+of $H_0$ against the saturated alternative is
+$$
+L_{0}=2\log f_{Y}(y;\hat{\theta}^{(s)})-2\log f_{Y}(y;\hat{\theta}^{(0)})
+$$  
+where $\hat{\theta}^{(s)}$ is such that $b'(\hat{\theta}^{(s)}) = y$.
+However, calibrating $L_0$ is not straightforward. In some
+circumstances (typically those where the response distribution might
+be adequately approximated by a normal) $L_{0}$ has an asymptotic
+chi-squared distribution with $n - q - 1$ degrees of freedom, under
+$H_0$. Large values of $L_{0}$ is evidence against $H_0$ as
+a plausible model for the data. However, in other situations, for
+example Bernoulli response distributions, the $\chi^2$ approximation
+to $L_{0}$ may be poor.
+
+The *degrees of freedom* of model $H_0$ and for this test is $n - q -
+1$, whicn is the number of observations minus the number of linear
+parameters of $H_0$.  We call $L_{0}$ the *scaled deviance* of model
+$H_0$.
+
+From ([-@eq-glm-loglik]) and ([-@eq-glm-lr]) we can write the
+scaled deviance of model $H_0$ as
+$$
+L_{0}=2\sum_{i=1}^n{{y_i[\hat{\theta}^{(s)}_i-\hat{\theta}^{(0)}_i]
+-[b(\hat{\theta}^{(s)}_i)-b(\hat{\theta}^{(0)}_i)]}
+\over{\phi_i}} \, ,
+$$ {#eq-glm-dev}
+which is easily computed using the observed data, provided that $\phi_i$
+ $(i = 1, \ldots, n)$ is known.
+
+::: {#rem-dev-tests}
+
+The log likelihood ratio statistic ([-@eq-glm-lr]) for testing $H_0$
+against a non-saturated alternative $H_1$ can be written as
+$$
+\begin{aligned}
+L_{01} &= 2\log f_{Y}(y;\hat{\theta}^{(1)}) - 2\log f_{Y}(y;\hat{\theta}^{(0)})  \\
+& = [2\log f_{Y}(y;\hat{\theta}^{(s)}) - 2\log f_{Y}(y;\hat{\theta}^{(0)})]
+- [2\log f_{Y}(y; \hat{\theta}^{(s)}) - 2\log f_{Y}(y;\hat{\theta}^{(1)})]  \\
+& = L_{0} - L_{1} \, .
+\end{aligned}
+$$ {#eq-glm-LR-diff-in-dev}
+The log likelihood ratio statistic for comparing two nested
+models is the difference between their scaled deviances.  Furthermore,
+as $ p - q = (n - q - 1) - (n - p - 1)$, that is the degrees of
+freedom for the test is the difference in degrees of freedom of the
+two models.
+
+:::
+
+::: {#rem-chisq-tests}
+
+An alternative goodness of fit statistic for a model $H_0$ is Pearson's $X^2$ given by
+$$
+X^2 = \sum_{i=1}^n {{(y_i - \hat{\mu}_i^{(0)})^2}\over{\widehat{\var(Y_i)}}} \,.
+$$ {#eq-pearson}
+$X^2$ is small when the squared differences between observed and
+fitted values (scaled by variance) is small. Hence, large values of
+$X^2$ correspond to poor fitting models.  In fact, $X^2$ and $L_{0}$
+are asymptotically equivalent.  However, the asymptotic
+$\chi^2_{n-q-1}$ approximation associated with $X^2$ is often more
+reliable.
+
+:::
+
+## Models with an unknown dispersion parameter {#sec-glm-unknown-disp}
+
+### Model comparison
+
+Thus far, we have assumed that $\phi_1, \ldots, \phi_n$ are known.
+This is the case for both the Poisson and Bernoulli distributions,
+where $\phi_i = 1$. When $\phi_i$ are not known, we can evaluate
+neither the scaled deviance ([-@eq-glm-dev]) nor the Pearson $X^2$
+statistic ([-@eq-pearson]), and hence we cannot directly construct
+inferences based on them, or compare models using ([-@eq-glm-LR-diff-in-dev]).
+
+Progress can be made if we assume that $\phi_i = \sigma^2 / m_i$ $(i =
+1, \ldots, n)$, where $\sigma^2$ is a common unknown dispersion
+parameter and $m_1, \ldots , m_n$ are known weights (this form is
+present in a normal linear model, where $\var(Y_i) =
+\sigma^2$). Under this assumption
+$$
+\begin{aligned}
+L_{0} &= {2\over\sigma^2}\sum_{i=1}^n \left[m_iy_i(\hat{\theta}^{(s)}_i-\hat{\theta}^{(0)}_i)
+- m_i \{b(\hat{\theta}^{(s)}_i) - b(\hat{\theta}^{(0)}_i)\}\right]  \\
+&\equiv{1\over\sigma^2} D_{0} \,,
+\end{aligned}
+$$ {#eq-glm-L-unknown-disp}
+where $D_{0}$ can be calculated using the observed data. We call
+$D_{0}$ the *deviance* of the model.
+
+In order to compare nested models $H_0$ and $H_1$,
+one might calculate the test statistic
+$$
+F = {{L_{01}/(p-q)}\over{L_{1}/(n-p-1)}}={{(L_{0}-L_{1})/(p-q)}\over{L_{1}/(n-p-1)}}
+={{(D_{0}-D_{1})/(p-q)}\over{D_{1}/(n-p-1)}}.
+$$ {#eq-glm-F-test}
+This statistic does not depend on the unknown dispersion parameter
+$\sigma^2$, so it can be calculated using the observed
+data. Asymptotically, under $H_0$, $L_{01}$ has a $\chi^2_{p-q}$
+distribution and $L_{01}$ and $L_{1}$ are independent (not proved
+here). Assuming that $L_1$ has an approximate $\chi^2_{n-p-1}$
+distribution, then $F$ has an approximate F distribution with $p-q$
+degrees of freedom in the numerator and $n-p-1$ degrees of freedom in
+the denominator. Hence, large values of $F$ is evidence against $H_0$
+in favour of $H_1$.
+
+### Inference about model parameters
+
+The dependence of the maximum likelihood equations $u(\hat{\beta}) =
+0$ on $\sigma^2$ (where $u$ is given by ([-@eq-glm-score])) can be
+eliminated by multiplying through by $\sigma^2$. However, inference
+based on the maximum likelihood estimates requires knowledge of
+$\sigma^2$. This is because asymptotically $\var(\hat{\beta})$ is the
+inverse of the Fisher information matrix ${\cal
+I}(\beta)=X^{\top}WX$, and this depends on
+$w_i=1/\{\var(Y_i)g'(\mu_i)^2\}$ where
+$\var(Y_i) = \phi_ib''(\theta_i) = \sigma^2 b''(\theta_i) / m_i$.
+
+To calculate standard errors and confidence intervals,
+we need to supply an estimate $\hat{\sigma}^2$ of $\sigma^2$. Despite that the maximum likelihood estimator of $\sigma^2$ is
+well-defined, it is more common to base an estimator of $\sigma^2$ on
+the Pearson $X^2$ statistic.  The variance of $Y_i$ can be written as $\var(Y_i) = \phi_i V(\mu_i) = \sigma^2 V(\mu_i) / m_i$, where $V(\mu_i) = b''(\theta_i)$ and $\theta_i = {b'}^{-1}(\mu_i)$ (see @sec-glm-intro). Hence, ([-@eq-pearson]) can be written as
+$$
+X^2={1\over\sigma^2}
+\sum_{i=1}^n {{m_i(y_i-\hat{\mu}_i)^2}\over{{V}(\hat{\mu}_i)}}.
+$$ {#eq-pearson2}
+
+::: {#exr-phi-estimation}
+
+Suppose that $H_0$ is an adequate fit and that $X^2$ has an
+chi-squared distribution with $n-q-1$ degrees of freedom. 
+
+1. Show that
+$$
+\hat{\sigma}^2 = {1\over{n-q-1}}
+\sum_{i=1}^n {{m_i(y_i-\hat{\mu}_i)^2}\over{{V}(\hat{\mu}_i)}}
+$$
+is an approximately unbiased estimator of $\sigma^2$. 
+
+2. Suggest an alternative estimator based on the deviance $D_0$.
+
+:::
+
+## Residuals and Model Checking
+
+Recall that for linear models, we define the residuals to be the
+differences between the observed and fitted values $y_i - \hat{\mu}_i$
+$(i = 1, \ldots, n)$. In fact, both the scaled deviance and Pearson
+$X^2$ statistic for a normal linear model (which is a GLM with normal
+distirbution and identity link function) are the sum of the squared
+residuals divided by $\sigma^2$.  We can build on that observation to
+defined residuals for other generalized linear models in a natural
+way.
+
+For any GLM, we define the *Pearson residuals* to be
+$$
+e^P_i= {{y_i-\hat{\mu}_i}\over{\widehat{Var(Y_i)}^{1/2}}} \qquad (i = 1, \ldots, n)\,.
+$$
+Then, from ([-@eq-pearson]), the statistic $X^2$ is the sum of the
+squared Pearson residuals.
+
+For any GLM, we define the *deviance residuals* to be
+$$
+e^D_i={\rm sign}(y_i-\hat{\mu}_i)
+\left[{{y_i(\hat{\theta}^{(s)}_i-\hat{\theta}_i)
+-\{b(\hat{\theta}^{(s)}_i)-b(\hat{\theta}_i)\}}
+\over{\phi_i}}\right]^{1/2} \qquad (i = 1, \ldots, n)\,,
+$$
+where ${\rm sign}(x) = 1$ if $x>0$ and $-1$ if $x<0$.
+Then, from ([-@eq-glm-dev]), the scaled deviance, $L_{0}$,
+is the sum of the squared deviance residuals.
+
+When $\phi_i = \sigma^2 / m_i$ and $\sigma^2$ is unknown, as in
+@sec-glm-unknown-disp, the expressions above are typically multiplied
+through by $\sigma^2$ to eliminate dependence on the unknown
+dispersion parameter.
+
+So, for a normal GLM the Pearson and deviance residuals are both
+equal to the usual residuals, $y_i - \hat{\mu}^{(0)}_i,\; i = 1, \ldots, n$.
+
+Both the Pearson and deviance residuals can be standardized by dividing through by $(1 - h_{ii})^{1/2}$, as in @sec-lm-inf. If the model is adequate, the derived residuals
+$$
+r_i^* = r^D_i + \frac{1}{r^D_i} \log\frac{r^P_i}{r^D_i}
+$$
+are close to normal for a wide range of GLMs, where $r^D_i$ and $r^P_i$ are the standardized deviance and Pearson residuals, respectively.
+
+Checking GLMs using residuals is based on the same kind of diagnostic
+plots suggested for linear models in @sec-lm-checking. Similarly, the
+Cook's distance $C_j$ for linear models can be adapted for GLMs by
+using Pearson residuals.
+
