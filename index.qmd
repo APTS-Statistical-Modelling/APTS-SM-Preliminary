@@ -1,10 +1,10 @@
-# Introduction
+# Introduction {.unnumbered}
 
 In order to get the most out of the APTS module on Statistical
 Modelling, students should have, at the start of the module, a sound
 knowledge of the principles of statistical inference and the theory of
 linear and generalised linear models. Students should also have some
-experience of practical statistical modelling in R.
+experience of statistical modelling in R.
 
 The following reading and activities are recommended to all students
 to (re)-familiarise themselves with those topics.
@@ -18,10 +18,10 @@ provided here.
 **Linear and generalised linear models**: A student who has covered
 @davison:2003 [Chapters 8 and 10.1-10.4] will be more than adequately
 prepared for the APTS module. For students without access to this
-book, the main theory is repeated below. The inference methodology
-described is largely based on classical statistical theory. Although
-prior experience of Bayesian statistical modelling would be helpful,
-it will not be assumed.
+book, the main theory is repeated in the current set of notes. The
+inference methodology described is largely based on classical
+statistical theory. Although prior experience of Bayesian statistical
+modelling would be helpful, it will not be assumed.
 
 **Preliminary material exercises**: Nine exercises are included in the
 current preliminary material.
@@ -29,6 +29,17 @@ current preliminary material.
 **R practicals**: Some practical exercises are also provided at the
 end of these notes to enable students to familiarise themselves with
 statistical modelling in R.
+
+## Typos and issues {.unnumbered}
+
+You can report and suggest fixes to typos and issues by opening a new
+issue at the GitHub repository hosting the preliminary material. The repository
+can be accessed [here](https://github.com/APTS-Statistical-Modelling/APTS-SM-Preliminary/issues/new).
+If you are reading the HTML version of this notes you can directly report an issue by clicking
+[Report an issue](https://github.com/APTS-Statistical-Modelling/APTS-SM-Preliminary/issues/new)
+on the right-hand-side panel. You can also suggest the edit directly
+by following the instructions after clicking "Edit this page".
+
 
 ## Acknowledgements {.unnumbered}
 

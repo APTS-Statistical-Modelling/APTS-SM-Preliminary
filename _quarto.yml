@@ -49,11 +49,13 @@ format:
   html:
     other-links:
       - text: "SM: Preliminary material"
-        href: https://ikosmidis.com/APTS-SM-preliminary
+        href: https://ikosmidis.com/files/APTS-SM-Preliminary
       - text: "SM: Notes"
-        href: https://ikosmidis.com/APTS-SM-notes
+        href: https://ikosmidis.com/files/APTS-SM-Notes
+      - text: ikosmidis.com
+        href: https://ikosmidis.com
       - text: "APTS"
-        href: https://apts.ac.uk
+        href: https://apts.ac.uk	
     number-depth: 2
     toc: true
     toc-location: right	
